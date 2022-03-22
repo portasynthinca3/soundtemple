@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "es2015",
+        
+        "sourceMap": true,
+        "strict": true,
+        "strictFunctionTypes": true,
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "alwaysStrict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "skipLibCheck": true,
+        "declaration": true,
+        "downlevelIteration": true
+    },
+
+    "include": ["src"],
+    "exclude": ["dist", "**/node_modules"]
+}

@@ -1,0 +1,81 @@
+@font-face {
+    font-family: "TempleOS";
+    src: url("./templeos_font.ttf");
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    /* VGA colors */
+    --black:   #000000;
+    --Iblack:  #555555;
+    --blue:    #0000aa;
+    --Iblue:   #5555ff;
+    --green:   #00aa00;
+    --Igreen:  #55ff55;
+    --cyan:    #00aaaa;
+    --Icyan:   #55ffff;
+    --red:     #aa0000;
+    --Ired:    #ff5555;
+    --pink:    #aa00aa;
+    --Ipink:   #ff55ff;
+    --yellow:  #aaaa00;
+    --Iyellow: #ffff55;
+    --white:   #aaaaaa;
+    --Iwhite:  #ffffff;
+
+    font-family: "TempleOS";
+    font-size: 10pt;
+}
+
+body {
+    margin: 3em !important;
+    height: calc(100vh - 9em);
+    overflow: hidden hidden;
+    background: var(--Iwhite);
+    color: var(--blue);
+}
+
+.window {
+    position: relative;
+    margin: 0.25em;
+    padding: 1em;
+    border: 0.5em double var(--blue);
+}
+.window::before {
+    position: absolute;
+    top: -0.75em;
+    left: 0.25em;
+    content: attr(data-win-left);
+    background: var(--Iwhite);
+}
+@keyframes title-blink {
+    from { color: var(--Iwhite) };
+    to   { color: var(--blue) };
+}
+.window::after {
+    position: absolute;
+    width: 16em;
+    top: -0.75em;
+    left: calc((100% - 16em) / 2);
+    right: calc((100% - 16em) / 2);
+    padding: 0 0.5em;
+    text-align: center;
+    content: attr(data-win-title);
+    background: var(--blue);
+    animation: 0.5s title-blink steps(2, jump-none) infinite alternate;
+}
+
+#missing-support {
+    display: none; /* gets set to "flex" by JS */
+    width: 35em;
+
+    flex-direction: column;
+    align-items: center;
+}
+#missing-support > span {
+    text-align: center;
+}
+#missing-support > #feature {
+    color: var(--green);
+}

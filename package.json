@@ -1,0 +1,36 @@
+{
+  "name": "soundtemple",
+  "version": "0.1.0",
+  "description": "TempleOS-like poem-to-music converter",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build:static": "cp -r src/*.html src/*.css src/*.ttf dist/",
+    "build:ts": "spack",
+    "build:wasm": "clang -O3 -Wall --target=wasm32 -flto -nostdlib -fvisibility=hidden -ffunction-sections -fdata-sections -std=c18 -Wl,--no-entry -Wl,--strip-all -Wl,--export-dynamic -Wl,--error-limit=0 -Wl,--lto-O3 -Wl,-O3 -Wl,--gc-sections src/c/*.c -o dist/index.wasm",
+    "build": "pnpm clean && mkdir dist && pnpm build:static && pnpm build:ts && pnpm build:wasm",
+    "serve": "static-server -p 8080 dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/portasynthinca3/soundtemple.git"
+  },
+  "keywords": [
+    "website",
+    "pwa",
+    "sound",
+    "text"
+  ],
+  "author": "portasynthinca3",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/portasynthinca3/soundtemple/issues"
+  },
+  "homepage": "https://github.com/portasynthinca3/soundtemple#readme",
+  "devDependencies": {
+    "@swc/cli": "^0.1.56",
+    "@swc/core": "^1.2.160",
+    "@types/emscripten": "^1.39.6",
+    "static-server": "^2.2.1"
+  }
+}
