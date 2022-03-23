@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf dist",
-    "build:static": "cp -r src/*.html src/*.css src/*.ttf dist/",
+    "build:static": "cp -r src/*.html src/*.css src/*.ttf src/*.cur dist/",
     "build:ts": "spack",
-    "build:wasm": "clang -O3 -Wall --target=wasm32 -flto -nostdlib -fvisibility=hidden -ffunction-sections -fdata-sections -std=c18 -Wl,--no-entry -Wl,--strip-all -Wl,--export-dynamic -Wl,--error-limit=0 -Wl,--lto-O3 -Wl,-O3 -Wl,--gc-sections src/c/*.c -o dist/index.wasm",
+    "build:wasm": "clang -O3 -Wall --target=wasm32 -flto -nostdlib -fvisibility=hidden -ffunction-sections -fdata-sections -std=c18 -Wl,--no-entry -Wl,--strip-all -Wl,--export-dynamic -Wl,--allow-undefined -Wl,--error-limit=0 -Wl,--lto-O3 -Wl,-O3 -Wl,--gc-sections src/c/*.c -o dist/index.wasm",
     "build": "pnpm clean && mkdir dist && pnpm build:static && pnpm build:ts && pnpm build:wasm",
     "serve": "static-server -p 8080 dist"
   },

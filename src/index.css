@@ -26,11 +26,16 @@
 
     font-family: "TempleOS";
     font-size: 10pt;
+    line-height: 1em;
+
+    cursor: url("./cursor.cur"), default;
 }
 
+
+
 body {
-    margin: 3em !important;
-    height: calc(100vh - 9em);
+    margin: 2em !important;
+    height: calc(100vh - 7em);
     overflow: hidden hidden;
     background: var(--Iwhite);
     color: var(--blue);
@@ -63,7 +68,8 @@ body {
     text-align: center;
     content: attr(data-win-title);
     background: var(--blue);
-    animation: 0.5s title-blink steps(2, jump-none) infinite alternate;
+    color: var(--Iwhite);
+    /* animation: 0.5s title-blink steps(2, jump-none) infinite alternate; */
 }
 
 #missing-support {
@@ -78,4 +84,75 @@ body {
 }
 #missing-support > #feature {
     color: var(--green);
+}
+
+
+
+#copyright {
+    font-size: 0.8em;
+}
+
+#main-layout {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+#poem-entry {
+    width: fit-content;
+}
+#poem {
+    width: 41em; /* 40 characters + scrollbar */
+    height: 100%;
+    border: none;
+    padding: 0;
+    margin: 0;
+    resize: none;
+    overflow: hidden scroll;
+    outline: none;
+    background: transparent;
+    cursor: url("./cursor.cur"), default;
+    caret-color: transparent;
+
+    font-family: TempleOS;
+    font-size: 10pt;
+    line-height: 1em;
+    word-break: break-all;
+
+    scrollbar-color: var(--blue) var(--Iwhite);
+    scrollbar-width: auto;
+}
+#poem::-webkit-scrollbar {
+    width: 1em;
+    margin: 0;
+}
+#poem::-webkit-scrollbar-track {
+    background: var(--Iwhite);
+}
+#poem::-webkit-scrollbar-thumb {
+    background: var(--blue);
+}
+
+@keyframes caret-blink {
+    from { background: var(--Iyellow) };
+    to   { background: var(--black) };
+}
+#caret {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1em;
+    height: 1em;
+    background: var(--black);
+    animation: 0.5s caret-blink steps(2, jump-none) infinite alternate;
+}
+
+#audio-vis {
+    width: 100%;
+    margin-left: 1em;
+}
+
+canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
