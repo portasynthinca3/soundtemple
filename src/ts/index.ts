@@ -34,7 +34,8 @@ poem.addEventListener("input", updateCaret);
 poem.addEventListener("click", updateCaret);
 poem.addEventListener("scroll", updateCaret);
 function updateCaret() {
-    const upToCaret = poem.value.substring(0, poem.selectionStart);
+    // take line wrapping and scrolling into account
+    const upToCaret = poem.value.substring(0, poem.selectionEnd);
     const lines = [...upToCaret.matchAll(/(.{1,40})|(^$)/gm)];
     if(lines.length === 0) {
         caret.style.top = caret.style.left = "1em";
@@ -46,9 +47,20 @@ function updateCaret() {
     caret.style.left = `${left + 1}em`;
 }
 updateCaret();
-poem.focus();
-// update caret visibility
 
+// update caret visibility
+poem.addEventListener("focus", updateCaretVis);
+poem.addEventListener("blur", updateCaretVis);
+function updateCaretVis() {
+    if(document.activeElement === poem)
+        caret.style.opacity = "1";
+    else
+        caret.style.opacity = "0";
+}
+poem.focus();
+updateCaretVis();
+
+document.addEventListener("keydown", () => poem.focus());
 
 function unsupportedError(feat: string) {
     $<HTMLSpanElement>("#missing-support #feature").innerText = feat;
