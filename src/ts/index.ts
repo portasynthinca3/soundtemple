@@ -87,7 +87,7 @@ function handleResize() {
     cancelAnimationFrame(frame);
 
     const original = [canvas.offsetWidth, canvas.offsetHeight];
-    const scaled = original.map(x => Math.floor(x / 4));
+    const scaled = original.map(x => Math.floor(x / 2));
     canvas.width = scaled[0];
     canvas.height = scaled[1];
     canvasCtx = canvas.getContext("2d")!;
@@ -103,3 +103,8 @@ function render() {
     worker.postMessage({ type: "frame" });
     frame = requestAnimationFrame(render);
 }
+
+// render audio
+setInterval(() => {
+    worker.postMessage({ type: "audio" });
+}, 10);

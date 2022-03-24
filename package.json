@@ -8,7 +8,7 @@
     "build:static": "cp -r src/*.html src/*.ttf src/*.cur dist/",
     "build:css": "postcss src/*.css --use autoprefixer -d dist/",
     "build:ts": "spack",
-    "build:wasm": "clang -O3 -Wall --target=wasm32-unknown-wasi --sysroot /usr/lib/wasi-libc -nostartfiles -Wl,--import-memory -Wl,--no-entry -Wl,--export-dynamic -Wl,--export=malloc src/c/*.c -s -o dist/index.wasm",
+    "build:wasm": "clang -O3 -Wall --target=wasm32-unknown-wasi --sysroot /usr/lib/wasi-libc -nostartfiles -Wl,--import-memory -Wl,--no-entry -Wl,--export-dynamic -Wl,--allow-undefined -Wl,--export=malloc src/c/*.c -s -o dist/index.wasm",
     "build": "pnpm clean && mkdir dist && pnpm build:static && pnpm build:css && pnpm build:ts && pnpm build:wasm",
     "serve": "static-server -p 8080 dist"
   },
