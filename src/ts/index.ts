@@ -1,13 +1,23 @@
+import { MsgFromRenderer } from "./render";
+
+// check support
+function unsupportedError(feat: string) {
+    $<HTMLSpanElement>("#missing-support #feature").innerText = feat;
+    $<HTMLDivElement>("#missing-support").style.display = "flex";
+    throw Error(`No ${feat} support`);
+}
+const featTest = {
+    "WebAssembly": WebAssembly,
+    "instantiateStreaming": WebAssembly.instantiateStreaming,
+    "matchAll": String.prototype.matchAll
+}
+for(const [k, v] of Object.entries(featTest))
+    if(!v) unsupportedError(k);
+
+// jQuery!
 function $<T extends HTMLElement>(selector: string) {
     return document.querySelector(selector) as unknown as T;
 }
-
-if(!WebAssembly)
-    unsupportedError("WebAssembly");
-if(!WebAssembly.instantiateStreaming)
-    unsupportedError("instantiateStreaming");
-if(!String.prototype.matchAll)
-    unsupportedError("matchAll");
 
 // update time and fake CPU usage
 setInterval(() => {
@@ -49,6 +59,7 @@ function updateCaret() {
 updateCaret();
 
 // update caret visibility
+document.addEventListener("keydown", () => poem.focus());
 poem.addEventListener("focus", updateCaretVis);
 poem.addEventListener("blur", updateCaretVis);
 function updateCaretVis() {
@@ -60,14 +71,35 @@ function updateCaretVis() {
 poem.focus();
 updateCaretVis();
 
-document.addEventListener("keydown", () => poem.focus());
-
-function unsupportedError(feat: string) {
-    $<HTMLSpanElement>("#missing-support #feature").innerText = feat;
-    $<HTMLDivElement>("#missing-support").style.display = "flex";
-    throw Error(`No ${feat} support`);
-}
-
 const worker = new Worker("./render.js");
-worker.postMessage({ type: "init" });
-worker.postMessage({ type: "test" });
+worker.addEventListener("message", (event: MessageEvent<MsgFromRenderer>) => {
+    const data = event.data;
+
+    if(data.type === "imgData")
+        canvasCtx.putImageData(data.data, 0, 0);
+});
+
+// handle canvas resizes
+const canvas = $<HTMLCanvasElement>("canvas");
+let canvasCtx = canvas.getContext("2d")!;
+window.addEventListener("resize", handleResize);
+function handleResize() {
+    cancelAnimationFrame(frame);
+
+    const original = [canvas.offsetWidth, canvas.offsetHeight];
+    const scaled = original.map(x => Math.floor(x / 4));
+    canvas.width = scaled[0];
+    canvas.height = scaled[1];
+    canvasCtx = canvas.getContext("2d")!;
+    worker.postMessage({ type: "init", size: scaled });
+
+    frame = requestAnimationFrame(render);
+}
+setTimeout(handleResize, 500);
+
+// render!
+let frame = -1;
+function render() {
+    worker.postMessage({ type: "frame" });
+    frame = requestAnimationFrame(render);
+}

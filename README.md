@@ -8,6 +8,7 @@ Test it over at [my website](https://portasynthinca3.me/soundtemple).
 Build it yourself with:
 ```bash
 # Install clang and lld first!
+# Also install wasi-libc to /usr/lib/wasi-libc
 $ git clone https://github.com/portasynthinca3/soundtemple.git
 $ cd soundtemple
 $ pnpm i
