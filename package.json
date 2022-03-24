@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf dist",
-    "build:static": "cp -r src/*.html src/*.css src/*.ttf src/*.cur dist/",
+    "build:static": "cp -r src/*.html src/*.ttf src/*.cur dist/",
+    "build:css": "postcss src/*.css --use autoprefixer -d dist/",
     "build:ts": "spack",
-    "build:wasm": "clang -O3 -Wall --target=wasm32 -flto -nostdlib -fvisibility=hidden -ffunction-sections -fdata-sections -std=c18 -Wl,--no-entry -Wl,--strip-all -Wl,--export-dynamic -Wl,--allow-undefined -Wl,--error-limit=0 -Wl,--lto-O3 -Wl,-O3 -Wl,--gc-sections src/c/*.c -o dist/index.wasm",
-    "build": "pnpm clean && mkdir dist && pnpm build:static && pnpm build:ts && pnpm build:wasm",
+    "build:wasm": "clang -O3 -Wall --target=wasm32-unknown-wasi --sysroot /usr/lib/wasi-libc -nostartfiles -Wl,--import-memory -Wl,--no-entry -Wl,--export-dynamic -Wl,--export=malloc src/c/*.c -s -o dist/index.wasm",
+    "build": "pnpm clean && mkdir dist && pnpm build:static && pnpm build:css && pnpm build:ts && pnpm build:wasm",
     "serve": "static-server -p 8080 dist"
   },
   "repository": {
@@ -30,7 +31,9 @@
   "devDependencies": {
     "@swc/cli": "^0.1.56",
     "@swc/core": "^1.2.160",
-    "@types/emscripten": "^1.39.6",
+    "autoprefixer": "^10.4.4",
+    "postcss": "^8.4.12",
+    "postcss-cli": "^9.1.0",
     "static-server": "^2.2.1"
   }
 }
