@@ -3,6 +3,9 @@
 #include <stdint.h>
 #include "wasm.h"
 
+#define min(a, b) ((a) <= (b) ? (a) : (b))
+#define max(a, b) ((a) >= (b) ? (a) : (b))
+
 #define COLOR_BLACK   0xFF000000
 #define COLOR_IBLACK  0xFF555555
 #define COLOR_BLUE    0xFFAA0000
@@ -48,7 +51,7 @@ typedef struct __attribute__((packed)) {
 } graphics_t;
 
 
-#define HISTORY_LEN 5 * 4410
+#define HISTORY_LEN 2 * 4410
 sample_t audio_history[HISTORY_LEN];
 
 
@@ -56,11 +59,11 @@ export void render_frame(graphics_t* gr, uint32_t time) {
     memset(gr->buffer, 0, gr->size_x * gr->size_y * sizeof(pixel_t));
 
     // find a starting point (trigger)
-    uint32_t max_diff = 0;
+    int32_t max_diff = -1;
     uint32_t start = HISTORY_LEN - (gr->size_x / 2);
-    for(uint32_t i = start - 1; i > gr->size_x / 2; i--) {
+    for(uint32_t i = start + 1; i > gr->size_x / 2 + 1; i--) {
         // find the point with the max difference
-        uint32_t diff = abs((int32_t)audio_history[i] - (int32_t)audio_history[i + 1]);
+        int32_t diff = (int32_t)audio_history[i] - (int32_t)audio_history[i + 1];
         if(diff > max_diff) {
             max_diff = diff;
             start = i;
@@ -71,28 +74,54 @@ export void render_frame(graphics_t* gr, uint32_t time) {
     start -= gr->size_x / 2;
 
     int32_t half_height = (int32_t)gr->size_y / 2;
-
+    int32_t last_sample = audio_history[start - 1];
     for(uint32_t x = 0; x < gr->size_x; x++) {
         int32_t sample = audio_history[start + x];
-        uint32_t pos = gr->size_y - (sample * half_height / INT16_MAX) - half_height - 1;
+        // repetition, yes, i know
+        int32_t pos = gr->size_y - (sample * half_height / INT16_MAX) - half_height - 1;
+        int32_t last_pos = gr->size_y - (last_sample * half_height / INT16_MAX) - half_height - 1;
 
-        uint32_t offs = (pos * gr->size_x) + x;
-        gr->buffer[offs].raw = COLOR_BLUE;
+        // draw lines (we don't want a bunch of disconnected points)
+        if(abs(pos - last_pos) <= 1) {
+            uint32_t offs = (pos * gr->size_x) + x;
+            gr->buffer[offs].raw = COLOR_BLUE;
+        } else {
+            int32_t lesser = min(pos, last_pos);
+            int32_t greater = max(pos, last_pos);
+            int32_t half_diff = (greater - lesser) / 2;
+            for(uint32_t y = lesser; y < lesser + half_diff; y++) {
+                uint32_t offs = (y * gr->size_x) + x;
+                if(last_pos < pos) offs -= 1;
+                gr->buffer[offs].raw = COLOR_BLUE;
+            }
+            for(uint32_t y = lesser + half_diff; y <= greater; y++) {
+                uint32_t offs = (y * gr->size_x) + x;
+                if(last_pos > pos) offs -= 1;
+                gr->buffer[offs].raw = COLOR_BLUE;
+            }
+        }
 
-        // fade at the ends
-        if(x < 10)
-            gr->buffer[offs].a -= 22 * (9 - x);
-        if(gr->size_x - x < 10)
-            gr->buffer[offs].a -= 22 * (10 - (gr->size_x - x));
+        last_sample = sample;
     }
 }
 
+
+float lpf_last = 0;
 export void render_audio(audio_t* audio, uint32_t time) {
     uint64_t phase = time * audio->rate / 1000;
 
+    // generate waveform
     for(uint32_t i = 0; i < audio->size; i++) {
-        audio->buffer[i] = (phase % 256) * 50 - (256 * 25);
+        audio->buffer[i] = ((phase % 256) > 128) * 50 * 256 - (256 * 25);
+        // audio->buffer[i] = (phase % 256) * 50 - (256 * 25);
         phase++;
+    }
+
+    // apply low-pass filter
+    float beta = 0.5;
+    for(uint32_t i = 1; i < audio->size; i++) {
+        lpf_last = lpf_last - (beta * (lpf_last - (float)audio->buffer[i]));
+        audio->buffer[i] = (int16_t)lpf_last;
     }
 
     // shift old data
